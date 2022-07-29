@@ -38,6 +38,8 @@ namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
+Camera camera;
+
 // Return a reasonable mime type based on the extension of a file.
 beast::string_view
 mime_type(beast::string_view path)
@@ -247,6 +249,11 @@ private:
                 send_file(req.target());
             // needs php processing so redirect it to PHP server
             else {
+                // check if there is an update flag in the query string
+                if (req.target().find("?") != std::string::npos && 
+                    req.target().find("update=true") != std::string::npos) {
+                    camera.saveCurrentImage();
+                }
                 net::io_context ioc_php;
                 tcp::resolver resolver_php(ioc_php);
                 beast::tcp_stream stream_php(ioc_php);
@@ -272,6 +279,7 @@ private:
                 response_.prepare_payload();
                 http::write(socket_, response_);
                 socket_.shutdown(tcp::socket::shutdown_send, ec);
+                accept();
             }
             break;
         default:
@@ -406,7 +414,6 @@ int main(int argc, char* argv[])
         }
 
         // run camera object on a different thread
-        Camera camera;
         std::thread camera_thread(&Camera::run, &camera);
 
         auto const address = net::ip::make_address(argv[1]);

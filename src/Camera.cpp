@@ -96,6 +96,7 @@ void Camera::run(){
 
 void Camera::saveCurrentImage(){
     cv::imwrite("img.jpg", current_image);
+    std::cout << "New image saved" << std::endl;
 }
 
 Camera::~Camera(){
