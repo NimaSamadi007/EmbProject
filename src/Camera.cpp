@@ -18,7 +18,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include "MQTTClient.h"
-
+#include "db_handler.hpp"
 
 Camera::Camera() 
     : last_num_of_faces{0}, cap{0}{
@@ -29,6 +29,7 @@ Camera::Camera()
     conn_opts.password = "qscesz159";
     if (MQTTClient_connect(client, &conn_opts) != MQTTCLIENT_SUCCESS)
         std::cout << "Unable to connect to MQTT broker" << std::endl;
+
 
     // load face detection model:
     if(!face_cascade.load("/home/nima/local-libs/opencv/share/opencv4/haarcascades/haarcascade_frontalcatface.xml"))
@@ -76,7 +77,10 @@ int Camera::detectFaces(cv::Mat frame){
 }
 
 void Camera::run(){
+    DBHandler db("test", "123456", "sensors");
     char faces[5]; // at most 10^5-1 faces in a frame!
+    char database_query[100];
+
     int num_of_faces;
 
     if (!cap.isOpened()) {
@@ -87,7 +91,12 @@ void Camera::run(){
     	cap >> current_image;
         num_of_faces = detectFaces(current_image);
         if (num_of_faces != last_num_of_faces){
-            sprintf(faces, "%d", num_of_faces);
+            // query database:
+            // sprintf(database_query, "INSERT INTO camera (num_of_faces) VALUES (%d)", num_of_faces);
+            // db.queryDB(database_query);
+
+            // publish to broker:
+            // sprintf(faces, "%d", num_of_faces);
             // publish("sensors/faces", faces);
             last_num_of_faces = num_of_faces;
         }
