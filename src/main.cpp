@@ -28,6 +28,8 @@
 #include <memory>
 #include <string>
 #include <regex>
+#include <thread>
+#include "Camera.hpp"
 
 #define PHP_SERVER_PORT "1234"
 
@@ -258,12 +260,8 @@ private:
                 beast::flat_buffer buffer_php;
                 http::response<http::dynamic_body> res_php;
                 http::read(stream_php, buffer_php, res_php);
-                // std::cout << "PHP server response \n";
-                // std::cout << res_php << std::endl;
-        
                 beast::error_code ec;
                 stream_php.socket().shutdown(tcp::socket::shutdown_both, ec);
-                //TODO: handle error in socket shutdown
 
                 response_.result(http::status::ok);
                 response_.keep_alive(false);
@@ -407,6 +405,10 @@ int main(int argc, char* argv[])
             return EXIT_FAILURE;
         }
 
+        // run camera object on a different thread
+        Camera camera;
+        std::thread camera_thread(&Camera::run, &camera);
+
         auto const address = net::ip::make_address(argv[1]);
         unsigned short port = static_cast<unsigned short>(std::atoi(argv[2]));
         std::string doc_root = argv[3];
@@ -427,6 +429,8 @@ int main(int argc, char* argv[])
           for (;;) ioc.poll();
         else
           ioc.run();
+
+        camera_thread.join();
     }
     catch (const std::exception& e)
     {

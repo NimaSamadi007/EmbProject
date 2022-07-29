@@ -1,3 +1,4 @@
+#include "Camera.hpp"
 #include "opencv2/objdetect.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
@@ -19,24 +20,22 @@
 #include "MQTTClient.h"
 
 
-#define ADDRESS     "localhost"
-#define CLIENTID    "Face1"
+Camera::Camera() 
+    : last_num_of_faces{0}, cap{0}{
+    // create a new MQTT client
+    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
+    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+    conn_opts.username = "face_det";
+    conn_opts.password = "qscesz159";
+    if (MQTTClient_connect(client, &conn_opts) != MQTTCLIENT_SUCCESS)
+        std::cout << "Unable to connect to MQTT broker" << std::endl;
 
-using namespace cv;
-using namespace std;
-
-int detectAndDisplay( Mat frame );
-CascadeClassifier face_cascade;
-MQTTClient client;
-
-void sigintHandler(int dummy){
-    printf("\nSIGINT received and handled\n");
-    MQTTClient_disconnect(client, 1000);
-    MQTTClient_destroy(&client);
-    exit(0);
+    // load face detection model:
+    if(!face_cascade.load("/home/nima/local-libs/opencv/share/opencv4/haarcascades/haarcascade_frontalcatface.xml"))
+        std::cout << "Unable to load face detection model" << std::endl;
 }
 
-void publish(MQTTClient client, char* topic, char* payload) {
+bool Camera::publish(char* topic, char* payload){
     MQTTClient_message pubmsg = MQTTClient_message_initializer;
     pubmsg.payload =  payload;
     pubmsg.payloadlen = strlen(payload);
@@ -45,99 +44,63 @@ void publish(MQTTClient client, char* topic, char* payload) {
     MQTTClient_deliveryToken token;
     MQTTClient_publishMessage(client, topic, &pubmsg, &token);
     MQTTClient_waitForCompletion(client, token, 1000L);
-    printf("Message '%s' with delivery token %d delivered\n", payload, token);
+    // printf("Message '%s' with delivery token %d delivered\n", payload, token);
+    return true;
 }
 
-int main()
-{
-    // handling sigint
-    signal(SIGINT, sigintHandler);
-
-    // setting up MQTT 
-    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
-    conn_opts.username = "face_det";
-    conn_opts.password = "qscesz159";
-
-    if (MQTTClient_connect(client, &conn_opts) != MQTTCLIENT_SUCCESS){
-        printf("Failed to connect\n");
-        exit(-1);
+int Camera::detectFaces(cv::Mat frame){
+    cv::Mat frame_gray;
+    cv::cvtColor(frame, frame_gray, cv::COLOR_BGR2GRAY);
+    cv::equalizeHist(frame_gray, frame_gray);
+    std::vector<cv::Rect> faces;
+    face_cascade.detectMultiScale(frame_gray, faces);	
+    for ( size_t i = 0; i < faces.size(); i++ ){
+        cv::putText(frame, 
+                std::to_string(i+1),
+                cv::Point(faces[i].x+(faces[i].width/2),faces[i].y - 10), 
+                cv::FONT_HERSHEY_COMPLEX_SMALL, 
+                1.0, 
+                cv::Scalar(255,255,255), 
+                1, 
+                cv:: LINE_AA);
+        cv::rectangle(frame, cv::Point(faces[i].x, faces[i].y), 
+                      cv::Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height), 
+                      cv::Scalar(0, 0, 255), 3, cv::LINE_8);
+        cv::Mat faceROI = frame_gray(faces[i] );
     }
-
-
-
-    cv::VideoCapture camera(0);
-    if (!camera.isOpened()) {
-        std::cerr << "ERROR: Could not open camera" << std::endl;
-        return 1;
-    }
-
-    if( !face_cascade.load( "/home/nima/local-libs/opencv/share/opencv4/haarcascades/haarcascade_frontalcatface.xml" ) )
-    {
-        cout << "--(!)Error loading face cascade\n";
-        return -1;
-    };
-
-	Mat frame;
-    // int recievedKey;
-    int preNumberOfFaces = 0;
-    int numberOfFaces = 0;
-    float temp;
-
-    char faces[5]; // at most 10^5-1 faces in a frame!
-    char temp_str[10];
-
-    while(1){
-    	camera >> frame;
-        numberOfFaces = detectAndDisplay(frame);
-        if (preNumberOfFaces != numberOfFaces){
-            sprintf(faces, "%d", numberOfFaces);
-            publish(client, "sensors/faces", faces);
-
-            preNumberOfFaces = numberOfFaces;
-
-            FILE* fptr = fopen("/sys/class/thermal/thermal_zone2/temp", "r");
-            fscanf(fptr, "%f", &temp);
-
-            sprintf(temp_str, "%f", temp/1000);
-            fclose(fptr);
-            publish(client, "sensors/temp", temp_str);
-        }
-        // recievedKey = waitKey(25);
-		// if (recievedKey == int('q'))
-		// 	break;
-    }
-
-    return 0;
-}
-
-
-int detectAndDisplay( Mat frame )
-{
-
-    Mat frame_gray;
-    cvtColor( frame, frame_gray, COLOR_BGR2GRAY );
-    equalizeHist( frame_gray, frame_gray );
-    std::vector<Rect> faces;
-    face_cascade.detectMultiScale( frame_gray, faces );	
-    for ( size_t i = 0; i < faces.size(); i++ )
-    {
-
-	cv::putText(frame, 
-            to_string(i+1),
-            cv::Point(faces[i].x+(faces[i].width/2),faces[i].y - 10), 
-            cv::FONT_HERSHEY_COMPLEX_SMALL, 
-            1.0, 
-            cv::Scalar(255,255,255), 
-            1, 
-            cv:: LINE_AA);
-	 
-
-	rectangle( frame, Point(faces[i].x, faces[i].y), Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height), Scalar(0, 0, 255), 3, LINE_8);
-        Mat faceROI = frame_gray( faces[i] );
-	}
 	
     // uncomment the following line to display the images
-    // imshow( "Capture - Face detection", frame );
+    // cv::imshow("Capture", frame);
+    // recievedKey = cv::waitKey(25);
     return (faces.size());
+}
+
+void Camera::run(){
+    char faces[5]; // at most 10^5-1 faces in a frame!
+    int num_of_faces;
+
+    if (!cap.isOpened()) {
+        std::cerr << "ERROR: Could not open camera" << std::endl;
+        return;
+    }
+    while(1){
+    	cap >> current_image;
+        num_of_faces = detectFaces(current_image);
+        if (num_of_faces != last_num_of_faces){
+            sprintf(faces, "%d", num_of_faces);
+            // publish("sensors/faces", faces);
+            last_num_of_faces = num_of_faces;
+        }
+    }
+}
+
+void Camera::saveCurrentImage(){
+    cv::imwrite("img.jpg", current_image);
+}
+
+Camera::~Camera(){
+    MQTTClient_disconnect(client, 1000);
+    MQTTClient_destroy(&client);
+    cv::destroyAllWindows();
+    cap.release();
 }
