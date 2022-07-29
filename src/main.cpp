@@ -29,6 +29,8 @@
 #include <string>
 #include <regex>
 
+#define PHP_SERVER_PORT "1234"
+
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
@@ -68,6 +70,24 @@ mime_type(beast::string_view path)
     if(iequals(ext, ".svg"))  return "image/svg+xml";
     if(iequals(ext, ".svgz")) return "image/svg+xml";
     return "application/text";
+}
+
+// returns 1 if boost can handle the reqest
+bool checkMimeType(beast::string_view path){
+    beast::string_view mt = mime_type(path);
+    if(mt == "text/html")  return false;
+    if(mt == "text/css")  return false;
+    if(mt == "text/plain")  return true;
+    if(mt == "application/javascript")  return false;
+    if(mt == "application/json")  return false;
+    if(mt == "image/png")  return true;
+    if(mt == "image/jpeg")  return true;
+    if(mt == "image/gif")  return true;
+    if(mt == "image/bmp")  return true;
+    if(mt == "image/vnd.microsoft.icon")  return true;
+    if(mt == "image/tiff")  return true;
+    if(mt == "image/svg+xml")  return true;
+    return false;
 }
 
 struct ParsedURI {
@@ -220,13 +240,15 @@ private:
         switch (req.method())
         {
         case http::verb::get:
-            // get request with parameters, send it to php server
-            if (req.target().find("?") != std::string::npos){ 
-                std::cout << "GET with parameters\n";
+            // this is a file and boost can handle it
+            if (checkMimeType(std::string(req.target())))
+                send_file(req.target());
+            // needs php processing so redirect it to PHP server
+            else {
                 net::io_context ioc_php;
                 tcp::resolver resolver_php(ioc_php);
                 beast::tcp_stream stream_php(ioc_php);
-                auto const results_php = resolver_php.resolve("localhost", "1234");
+                auto const results_php = resolver_php.resolve("localhost", PHP_SERVER_PORT);
                 stream_php.connect(results_php);
                 http::request<http::string_body> req_php{http::verb::get, req.target(), 10};
                 req_php.set(http::field::host, "localhost");
@@ -252,11 +274,6 @@ private:
                 response_.prepare_payload();
                 http::write(socket_, response_);
                 socket_.shutdown(tcp::socket::shutdown_send, ec);
-            } //TODO: must redirect php file to php server directly
-            // get file request 
-            else {
-                std::cout << "GET file request\n";
-                send_file(req.target());
             }
             break;
         default:
