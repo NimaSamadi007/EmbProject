@@ -156,6 +156,8 @@ private:
     // The file-based response serializer.
     boost::optional<http::response_serializer<http::file_body, http::basic_fields<alloc_t>>> file_serializer_;
 
+    http::response<http::dynamic_body> response_;
+
     void accept()
     {
         // Clean up any previous connection.
@@ -218,12 +220,45 @@ private:
         switch (req.method())
         {
         case http::verb::get:
-            // for (auto&& f : req)
-            //     std::cout << f.name_string() << ": " << f.value() << "\n";
-            // std::cout << "======================\n";
-            send_file(req.target());
-            break;
+            // get request with parameters, send it to php server
+            if (req.target().find("?") != std::string::npos){ 
+                std::cout << "GET with parameters\n";
+                net::io_context ioc_php;
+                tcp::resolver resolver_php(ioc_php);
+                beast::tcp_stream stream_php(ioc_php);
+                auto const results_php = resolver_php.resolve("localhost", "1234");
+                stream_php.connect(results_php);
+                http::request<http::string_body> req_php{http::verb::get, req.target(), 10};
+                req_php.set(http::field::host, "localhost");
+                req_php.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+                http::write(stream_php, req_php);
+        
+                beast::flat_buffer buffer_php;
+                http::response<http::dynamic_body> res_php;
+                http::read(stream_php, buffer_php, res_php);
+                // std::cout << "PHP server response \n";
+                // std::cout << res_php << std::endl;
+        
+                beast::error_code ec;
+                stream_php.socket().shutdown(tcp::socket::shutdown_both, ec);
+                //TODO: handle error in socket shutdown
 
+                response_.result(http::status::ok);
+                response_.keep_alive(false);
+                response_.set(http::field::server, "Beast");
+                response_.set(http::field::content_type, "text/html");
+                response_.content_length(res_php.body().size());
+                response_.body() = std::move(res_php.body());
+                response_.prepare_payload();
+                http::write(socket_, response_);
+                socket_.shutdown(tcp::socket::shutdown_send, ec);
+            } //TODO: must redirect php file to php server directly
+            // get file request 
+            else {
+                std::cout << "GET file request\n";
+                send_file(req.target());
+            }
+            break;
         default:
             // We return responses indicating an error if
             // we do not recognize the request method.
@@ -266,8 +301,6 @@ private:
 
     void send_file(beast::string_view target)
     {
-        std::cout << target << std::endl;
-        // Request path must be absolute and not contain "..".
         if (target.empty())
         {
             send_bad_response(
