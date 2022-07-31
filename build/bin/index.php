@@ -1,3 +1,10 @@
+<?php
+$db_host = "localhost";
+$db_user = "test";
+$db_pass = "123456";
+$db_name = "sensors";
+$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+?>
 <!doctype html>
 <html>
 <head>
@@ -9,7 +16,7 @@
         <div class="w-50 rounded" style="background-color:#007bff; margin-top: 20px; margin-left:auto; margin-right:auto; padding:10px; color: white;">Real-time Embedded Systems Course Project</div>
     </div>
     <div class="row">
-        <div class="w-50 shadow rounded" style="width:40%; border:solid 1px white; margin-left:auto; margin-right:auto; padding:10px; background-color: white;">
+        <div class="w-50 shadow rounded" style="border:solid 1px white; margin-left:auto; margin-right:auto; padding:10px; background-color: white;">
             <img class="w-75 rounded" src="./img.jpg" style="border: solid #007bff 2px;">
             <form method="GET" action="index.php">
                 <input type="hidden" name="update" value="true">
@@ -17,6 +24,26 @@
             </form>
         </div>
     </div>
+    <div class="row">
+        <div class="w-50 shadow rounded" style="margin-left:auto; margin-right:auto; background-color: white; margin-top: 30px;">
+            <div class="col w" style="background-color:#007bff; font-size:40px; color: white; margin-left: auto; margin-right: auto;">
+                Database
+            </div>
+            <div class="col w-50"> 
+                <form method="GET" action="index.php">
+                    <input class="w-25 h-25 rounded" type="input" name="num_of_faces" placeholder="1">
+                    <input class="btn btn-primary" style="font-size:18px" type="submit" value="show">
+                </form>
+            </div>
+            <div class="col w-50"> 
+                <form method="GET" action="index.php">
+                    <input class="w-25 h-25 rounded" type="input" name="num_of_faces" placeholder="1">
+                    <input class="btn btn-primary" style="font-size:18px" type="submit" value="show">
+                </form>
+            </div>
+        </div>
+    </div>
+
     <?php
         switch($_SERVER["REQUEST_METHOD"]){
             case 'GET':
