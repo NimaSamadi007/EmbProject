@@ -25,31 +25,49 @@ $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
         </div>
     </div>
     <div class="row">
-        <div class="w-50 shadow rounded" style="margin-left:auto; margin-right:auto; background-color: white; margin-top: 30px;">
-            <div class="col w" style="background-color:#007bff; font-size:40px; color: white; margin-left: auto; margin-right: auto;">
-                Database
-            </div>
-            <div class="col w-50"> 
+        <div class="w-50 shadow rounded" style="background-color:#007bff; font-size:40px; color: white; margin-left: auto; margin-right: auto; margin-top: 30px">
+            Database
+        </div>
+    </div>
+    <div class="row w-50" style="border:solid 1px white; margin-left:auto; margin-right:auto; background-color: white;">
+        <div class="col">
+            <div class="row-50">
                 <form method="GET" action="index.php">
-                    <input class="w-25 h-25 rounded" type="input" name="num_of_faces" placeholder="1">
-                    <input class="btn btn-primary" style="font-size:18px" type="submit" value="show">
-                </form>
-            </div>
-            <div class="col w-50"> 
-                <form method="GET" action="index.php">
-                    <input class="w-25 h-25 rounded" type="input" name="num_of_faces" placeholder="1">
-                    <input class="btn btn-primary" style="font-size:18px" type="submit" value="show">
+                    <input class="col rounded" type="input" name="db_rows" placeholder="1" style="width: 70px; height: 50px; font-size: 18px; margin-left: auto; margin-right:auto; margin-top: 0">
+                    <input class="btn btn-primary" style="font-size:16px; height: 60px; margin-left: auto; margin-right:auto; margin-top: 5px" type="submit" value="show">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="table_type" value="camera" id="flexRadioDefault1">
+                      <label class="form-check-label" for="flexRadioDefault1">
+                        Camera
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="table_type" value="audio" id="flexRadioDefault2" checked>
+                      <label class="form-check-label" for="flexRadioDefault2">
+                        Audio
+                      </label>
+                    </div>
+
                 </form>
             </div>
         </div>
     </div>
-
     <?php
         switch($_SERVER["REQUEST_METHOD"]){
             case 'GET':
                 if (!empty($_GET)){
                     if ($_GET["update"] == "true"){
+                        print_r("Updating image...");
                     }
+                    elseif ($_GET["table_type"] == "camera"){
+                        print_r("Sending camera rows: ");
+                        print_r($_GET["db_rows"]);
+                    }
+                    elseif ($_GET["table_type"] == "audio"){
+                        print_r("Sending audio rows: ");
+                        print_r($_GET["db_rows"]);
+                    }
+
                     $res = $_GET;
                 }else{
                     $res = 'No request';
