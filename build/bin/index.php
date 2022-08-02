@@ -13,7 +13,8 @@ $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 </head>
 <body style="font-size:40px; text-align:center; margin:0; background-color: #FFF8DC">
     <div class="row">
-        <div class="w-50 rounded" style="background-color:#007bff; margin-top: 20px; margin-left:auto; margin-right:auto; padding:10px; color: white;">Real-time Embedded Systems Course Project</div>
+        <div class="w-50 rounded" style="background-color:#007bff; margin-top: 20px; margin-left:auto; margin-right:auto; padding:10px; color: white;">Real-time Embedded Systems Course Project
+        </div>
     </div>
     <div class="row">
         <div class="w-50 shadow rounded" style="border:solid 1px white; margin-left:auto; margin-right:auto; padding:10px; background-color: white;">
@@ -25,31 +26,34 @@ $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
         </div>
     </div>
     <div class="row">
-        <div class="w-50 shadow rounded" style="background-color:#007bff; font-size:40px; color: white; margin-left: auto; margin-right: auto; margin-top: 30px">
+        <div class="w-50 rounded" style="background-color:#007bff; font-size:40px; color: white; margin-left: auto; margin-right: auto; margin-top: 30px;">
             Database
         </div>
     </div>
-    <div class="row w-50" style="border:solid 1px white; margin-left:auto; margin-right:auto; background-color: white;">
-        <div class="col">
-            <div class="row-50">
-                <form method="GET" action="index.php">
-                    <input class="col rounded" type="input" name="db_rows" placeholder="1" style="width: 70px; height: 50px; font-size: 18px; margin-left: auto; margin-right:auto; margin-top: 0">
-                    <input class="btn btn-primary" style="font-size:16px; height: 60px; margin-left: auto; margin-right:auto; margin-top: 5px" type="submit" value="show">
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="table_type" value="camera" id="flexRadioDefault1">
-                      <label class="form-check-label" for="flexRadioDefault1">
-                        Camera
+    <div class="row">
+        <div class="w-50 shadow rounded" style="border:solid 1px white; margin-left:auto; margin-right:auto; background-color: white; padding: 10px;">
+            <form method="GET" action="index.php">
+                <div style="display: inline-block;">
+                    <div class="col form-check">
+                      <input class="form-check-input" type="radio" name="table_type" value="camera" id="flexRadioDefault1" style="vertical-align: middle; text-align: center; margin-left: -1px;">
+                      <label class="form-check-label" for="flexRadioDefault1" style="font-size: 20px">
+                      Camera
                       </label>
                     </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="table_type" value="audio" id="flexRadioDefault2" checked>
-                      <label class="form-check-label" for="flexRadioDefault2">
-                        Audio
-                      </label>
-                    </div>
-
-                </form>
-            </div>
+                </div>
+                <div style="display: inline-block;">
+                    <div class="col form-check">
+                          <input class="form-check-input" type="radio" name="table_type" value="audio" id="flexRadioDefault2" checked style="vertical-align: bottom; text-align: center; margin-left: -1px;">
+                          <label class="form-check-label" for="flexRadioDefault2" style="font-size: 20px">
+                            Audio
+                          </label>
+                    </div>    
+                </div>
+                <div class="row" style="margin-top: 20px;">
+                    <input class="rounded" type="input" name="db_rows" placeholder="1" style="width: 150px; height: 60px; font-size: 22px; margin-left: auto; margin-right: 30px; margin-top: 0; margin-bottom: 10px; display: block; vertical-align: middle">
+                    <input class="btn btn-primary" style="font-size:22px; width: 150px; height: 50px; margin-right: auto; margin-left: 30px; margin-top: 5px; margin-bottom: 10px; vertical-align: middle;" type="submit" value="show">
+                </div>
+            </form>
         </div>
     </div>
     <?php
