@@ -20,6 +20,6 @@ include_directories("/home/nima/local-libs/boost" "include")
 link_directories("/home/nima/local-libs/boost/stage/lib")
 link_directories(${PAHO_MQTT_ROOT}/lib)
 
-add_executable(${PROJECT_NAME} "src/main.cpp" "src/Camera.cpp" "src/db_handler.cpp")
+add_executable(${PROJECT_NAME} "src/main.cpp" "src/Camera.cpp" "src/db_handler.cpp" "src/URIParser.cpp")
 target_compile_options(${PROJECT_NAME} PUBLIC ${MYSQL_CFLAGS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS} paho-mqtt3c ${MYSQL_LIBS})

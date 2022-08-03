@@ -8,7 +8,7 @@ else
 	cd /home/nima/Documents/e/embedded-sys/project/server/build/bin
 
 	# first run php server on port 1234 (make sure this port is available, otherwise must be changed)
-	php -S localhost:1234>/dev/null 2>&1 &
+	# php -S localhost:1234>/dev/null 2>&1 &
 
 	# then run my server
 	./server $1 $2 . 10 block

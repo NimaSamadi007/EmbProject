@@ -30,8 +30,7 @@
 #include <regex>
 #include <thread>
 #include "Camera.hpp"
-
-#define PHP_SERVER_PORT "1234"
+#include "URIParser.hpp"
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
@@ -244,44 +243,22 @@ private:
         switch (req.method())
         {
         case http::verb::get:
-            // this is a file and boost can handle it
-            if (checkMimeType(std::string(req.target())))
-                send_file(req.target());
-            // needs php processing so redirect it to PHP server
-            else {
-                // check if there is an update flag in the query string
-                if (req.target().find("?") != std::string::npos && 
-                    req.target().find("update=true") != std::string::npos) {
+        {   
+            boost::string_view file_req = req.target();
+            // needs html generating
+            if (req.target().find("?") != std::string::npos) {
+                URIParser uri = URIParser(req.target().to_string());
+                if (uri.getValue("update") == "true")
                     camera.saveCurrentImage();
-                }
-                net::io_context ioc_php;
-                tcp::resolver resolver_php(ioc_php);
-                beast::tcp_stream stream_php(ioc_php);
-                auto const results_php = resolver_php.resolve("localhost", PHP_SERVER_PORT);
-                stream_php.connect(results_php);
-                http::request<http::string_body> req_php{http::verb::get, req.target(), 10};
-                req_php.set(http::field::host, "localhost");
-                req_php.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-                http::write(stream_php, req_php);
-        
-                beast::flat_buffer buffer_php;
-                http::response<http::dynamic_body> res_php;
-                http::read(stream_php, buffer_php, res_php);
-                beast::error_code ec;
-                stream_php.socket().shutdown(tcp::socket::shutdown_both, ec);
-
-                response_.result(http::status::ok);
-                response_.keep_alive(false);
-                response_.set(http::field::server, "Beast");
-                response_.set(http::field::content_type, "text/html");
-                response_.content_length(res_php.body().size());
-                response_.body() = std::move(res_php.body());
-                response_.prepare_payload();
-                http::write(socket_, response_);
-                socket_.shutdown(tcp::socket::shutdown_send, ec);
-                accept();
+                else if(uri.getValue("table_type") == "camera")
+                    std::cout << "generate html for camera\n";
+                else if(uri.getValue("table_type") == "audio")
+                    std::cout << "generate html for audio\n";
+                file_req = uri.getPath();
             }
+            send_file(file_req);
             break;
+        }
         default:
             // We return responses indicating an error if
             // we do not recognize the request method.
