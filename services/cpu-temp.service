@@ -1,0 +1,13 @@
+[Unit]
+Description=Checks CPU temprature and publishes it to mosquitto
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/nima/Documents/e/embedded-sys/project/server/services/getCPUTemp.sh
+Restart=always
+User=nima
+Group=nima
+
+[Install]
+WantedBy=multi-user.target

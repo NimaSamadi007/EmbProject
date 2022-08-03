@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /home/nima/Documents/e/embedded-sys/project/server/services
+
 while [ 1 ]
 do
 	# record sound from microphone

@@ -1,0 +1,13 @@
+[Unit]
+Description=Checks average system load and publishes to mosquitto
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/nima/Documents/e/embedded-sys/project/server/services/getSystemLoad.sh
+Restart=always
+User=nima
+Group=nima
+
+[Install]
+WantedBy=multi-user.target

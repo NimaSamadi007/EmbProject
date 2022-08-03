@@ -1,0 +1,13 @@
+[Unit]
+Description=Checks audio level and handles level violation
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/nima/Documents/e/embedded-sys/project/server/services/detectSoundThr.sh
+Restart=always
+User=nima
+Group=nima
+
+[Install]
+WantedBy=multi-user.target

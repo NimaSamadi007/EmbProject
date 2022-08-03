@@ -92,8 +92,8 @@ void Camera::run(){
         num_of_faces = detectFaces(current_image);
         if (num_of_faces != last_num_of_faces){
             // query database:
-            //sprintf(database_query, "INSERT INTO camera (num_of_faces) VALUES (%d)", num_of_faces);
-            //db.queryDB(database_query);
+            sprintf(database_query, "INSERT INTO camera (num_of_faces) VALUES (%d)", num_of_faces);
+            db.queryDB(database_query);
 			
 			// get current date and time:
 			time_t t = time(NULL);

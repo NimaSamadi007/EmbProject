@@ -1,0 +1,13 @@
+[Unit]
+Description=Run webserver and handle camera
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/home/nima/Documents/e/embedded-sys/project/server/services/runServer.sh 0.0.0.0 1235
+Restart=always
+User=nima
+Group=nima
+
+[Install]
+WantedBy=multi-user.target
