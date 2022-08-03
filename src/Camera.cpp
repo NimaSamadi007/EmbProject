@@ -25,8 +25,8 @@ Camera::Camera()
     // create a new MQTT client
     MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
-    conn_opts.username = "face_det";
-    conn_opts.password = "qscesz159";
+    conn_opts.username = "camera";
+    conn_opts.password = "12345678";
     if (MQTTClient_connect(client, &conn_opts) != MQTTCLIENT_SUCCESS)
         std::cout << "Unable to connect to MQTT broker" << std::endl;
 
@@ -45,7 +45,7 @@ bool Camera::publish(char* topic, char* payload){
     MQTTClient_deliveryToken token;
     MQTTClient_publishMessage(client, topic, &pubmsg, &token);
     MQTTClient_waitForCompletion(client, token, 1000L);
-    // printf("Message '%s' with delivery token %d delivered\n", payload, token);
+    printf("Message '%s' with delivery token %d delivered\n", payload, token);
     return true;
 }
 
@@ -95,9 +95,9 @@ void Camera::run(){
             //sprintf(database_query, "INSERT INTO camera (num_of_faces) VALUES (%d)", num_of_faces);
             //db.queryDB(database_query);
 
-            // publish to broker:
-            // sprintf(faces, "%d", num_of_faces);
-            // publish("sensors/faces", faces);
+            // publish to MQTT broker:
+            sprintf(faces, "%d", num_of_faces);
+            publish("sensors/camera", faces);
             last_num_of_faces = num_of_faces;
         }
     }
