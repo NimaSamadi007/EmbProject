@@ -14,7 +14,7 @@
 #include <chrono>
 #include <cstring>
 #include <stdio.h>
-#include <ctime>
+#include <time.h>
 #include <signal.h>
 #include <stdlib.h>
 #include "MQTTClient.h"
@@ -94,10 +94,14 @@ void Camera::run(){
             // query database:
             //sprintf(database_query, "INSERT INTO camera (num_of_faces) VALUES (%d)", num_of_faces);
             //db.queryDB(database_query);
-
+			
+			// get current date and time:
+			time_t t = time(NULL);
+			struct tm tm = *localtime(&t);
+			char message[100];
             // publish to MQTT broker:
-            sprintf(faces, "%d", num_of_faces);
-            publish("sensors/camera", faces);
+            sprintf(message, "%d@%d-%02d-%02d %02d:%02d:%02d", num_of_faces, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+            publish("sensors/camera", message);
             last_num_of_faces = num_of_faces;
         }
     }
