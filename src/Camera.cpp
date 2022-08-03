@@ -30,7 +30,6 @@ Camera::Camera()
     if (MQTTClient_connect(client, &conn_opts) != MQTTCLIENT_SUCCESS)
         std::cout << "Unable to connect to MQTT broker" << std::endl;
 
-
     // load face detection model:
     if(!face_cascade.load("/home/nima/local-libs/opencv/share/opencv4/haarcascades/haarcascade_frontalcatface.xml"))
         std::cout << "Unable to load face detection model" << std::endl;
@@ -91,9 +90,9 @@ void Camera::run(){
     	cap >> current_image;
         num_of_faces = detectFaces(current_image);
         if (num_of_faces != last_num_of_faces){
-            // query database:
+            // write to database:
             // sprintf(database_query, "INSERT INTO camera (num_of_faces) VALUES (%d)", num_of_faces);
-            // db.queryDB(database_query);
+            // db.writeToDB(database_query);
 			
 			// get current date and time:
 			// time_t t = time(NULL);
