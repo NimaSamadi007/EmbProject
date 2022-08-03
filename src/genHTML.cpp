@@ -87,8 +87,11 @@ bool genHTML::generate(std::string table_type, int n){
                           << "<td>" << row[2] << "</td>" << endl
                           << "</tr>" << endl;
             }
+            html_file << "</tbody>" << endl
+                      << "</table>" << endl;
+            mysql_free_result(res);      
         }
-        else{
+        else if(table_type == "audio"){
             sprintf(db_query, "SELECT * FROM ( SELECT * FROM sound ORDER BY id DESC LIMIT %d) sub ORDER BY id ASC", n);
             db_handler.readFromDB(db_query, &res);
             html_file << "<table class=\"table table-striped table-hover\" style=\"font-size: 18px\">" << endl
@@ -107,16 +110,16 @@ bool genHTML::generate(std::string table_type, int n){
                           << "<td>" << row[1] << "</td>" << endl
                           << "</tr>" << endl;
             }
-        }
-    html_file << "</tbody>" << endl
-              << "</table>" << endl
-              << "</div>" << endl
+            html_file << "</tbody>" << endl
+                      << "</table>" << endl;
+            mysql_free_result(res);      
+        } 
+    html_file << "</div>" << endl
               << "</div>" << endl
               << "</div>" << endl
               << "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js\" integrity=\"sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2\" crossorigin=\"anonymous\"></script>" << endl
               << "</body>" << endl
               << "</html>" << endl;
-    mysql_free_result(res);
     html_file.close();
     return true;
 }

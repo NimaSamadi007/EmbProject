@@ -73,7 +73,7 @@ mime_type(beast::string_view path)
     if(iequals(ext, ".tif"))  return "image/tiff";
     if(iequals(ext, ".svg"))  return "image/svg+xml";
     if(iequals(ext, ".svgz")) return "image/svg+xml";
-    return "application/text";
+    return "text/html";
 }
 
 struct ParsedURI {
@@ -228,16 +228,22 @@ private:
         case http::verb::get:
         {   
             boost::string_view file_req = req.target();
-            // needs html generating
-            if (req.target().find("?") != std::string::npos) {
-                URIParser uri = URIParser(req.target().to_string());
-                if (uri.getValue("update") == "true")
-                    camera.saveCurrentImage();
-                else if(uri.getValue("table_type") == "camera")
-                    genHTML::generate(uri.getValue("table_type"), std::stoi(uri.getValue("db_rows")));
-                else if(uri.getValue("table_type") == "audio")
-                    genHTML::generate(uri.getValue("table_type"), std::stoi(uri.getValue("db_rows")));
-                file_req = uri.getPath();
+            if (mime_type(std::string(req.target())) == "text/html"){ // request for sending html file
+                // needs html generating
+                if (req.target().find("?") != std::string::npos) {
+                    URIParser uri = URIParser(req.target().to_string());
+                    if (uri.getValue("update") == "true")
+                        camera.saveCurrentImage();
+                    else if(uri.getValue("table_type") == "camera")
+                        genHTML::generate(uri.getValue("table_type"), std::stoi(uri.getValue("db_rows")));
+                    else if(uri.getValue("table_type") == "audio")
+                        genHTML::generate(uri.getValue("table_type"), std::stoi(uri.getValue("db_rows")));
+                    file_req = uri.getPath();
+                }
+                else{
+                    // generate without table
+                    genHTML::generate("", 0);      
+                }
             }
             send_file(file_req);
             break;
@@ -365,11 +371,11 @@ int main(int argc, char* argv[])
         // Check command line arguments.
         if (argc != 6)
         {
-            std::cerr << "Usage: http_server_fast <address> <port> <doc_root> <num_workers> {spin|block}\n";
+            std::cerr << "Usage: server <address> <port> <doc_root> <num_workers> {spin|block}\n";
             std::cerr << "  For IPv4, try:\n";
-            std::cerr << "    http_server_fast 0.0.0.0 80 . 100 block\n";
+            std::cerr << "    server 0.0.0.0 80 . 100 block\n";
             std::cerr << "  For IPv6, try:\n";
-            std::cerr << "    http_server_fast 0::0 80 . 100 block\n";
+            std::cerr << "    server 0::0 80 . 100 block\n";
             return EXIT_FAILURE;
         }
 
