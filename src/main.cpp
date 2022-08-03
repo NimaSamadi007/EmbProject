@@ -31,6 +31,7 @@
 #include <thread>
 #include "Camera.hpp"
 #include "URIParser.hpp"
+#include "genHTML.hpp"
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
@@ -73,24 +74,6 @@ mime_type(beast::string_view path)
     if(iequals(ext, ".svg"))  return "image/svg+xml";
     if(iequals(ext, ".svgz")) return "image/svg+xml";
     return "application/text";
-}
-
-// returns 1 if boost can handle the reqest
-bool checkMimeType(beast::string_view path){
-    beast::string_view mt = mime_type(path);
-    if(mt == "text/html")  return false;
-    if(mt == "text/css")  return false;
-    if(mt == "text/plain")  return true;
-    if(mt == "application/javascript")  return false;
-    if(mt == "application/json")  return false;
-    if(mt == "image/png")  return true;
-    if(mt == "image/jpeg")  return true;
-    if(mt == "image/gif")  return true;
-    if(mt == "image/bmp")  return true;
-    if(mt == "image/vnd.microsoft.icon")  return true;
-    if(mt == "image/tiff")  return true;
-    if(mt == "image/svg+xml")  return true;
-    return false;
 }
 
 struct ParsedURI {
@@ -251,9 +234,9 @@ private:
                 if (uri.getValue("update") == "true")
                     camera.saveCurrentImage();
                 else if(uri.getValue("table_type") == "camera")
-                    std::cout << "generate html for camera\n";
+                    genHTML::generate(uri.getValue("table_type"), std::stoi(uri.getValue("db_rows")));
                 else if(uri.getValue("table_type") == "audio")
-                    std::cout << "generate html for audio\n";
+                    genHTML::generate(uri.getValue("table_type"), std::stoi(uri.getValue("db_rows")));
                 file_req = uri.getPath();
             }
             send_file(file_req);
