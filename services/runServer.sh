@@ -8,6 +8,6 @@ else
 	cd /home/nima/Documents/e/embedded-sys/project/server/build/bin
 
 	#run server
-	./server $1 $2 . 10 block
+	./server $1 $2 . 5 block
 fi
 

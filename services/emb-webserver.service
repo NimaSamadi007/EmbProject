@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/home/nima/Documents/e/embedded-sys/project/server/services/runServer.sh 0.0.0.0 1235
+ExecStart=/home/nima/Documents/e/embedded-sys/project/server/services/runServer.sh 0.0.0.0 1234
 Restart=always
 User=nima
 Group=nima
