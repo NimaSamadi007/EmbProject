@@ -62,7 +62,7 @@ bool genHTML::generate(std::string table_type, int n){
          << "</div>" << endl
          << "</div>" << endl
          << "<div class=\"row\" style=\"margin-top: 20px;\"> " << endl
-         << "<input class=\"rounded\" type=\"input\" name=\"db_rows\" placeholder=\"1\" style=\"width: 150px; height: 60px; font-size: 22px; margin-left: auto; margin-right: 30px; margin-top: 0; margin-bottom: 10px; display: block; vertical-align: middle; text-align: center;\"> " << endl
+         << "<input class=\"rounded\" type=\"input\" name=\"db_rows\" value=\"1\" placeholder=\"1\" style=\"width: 150px; height: 60px; font-size: 22px; margin-left: auto; margin-right: 30px; margin-top: 0; margin-bottom: 10px; display: block; vertical-align: middle; text-align: center;\"> " << endl
          << "<input class=\"btn btn-primary\" style=\"font-size:22px; width: 150px; height: 50px; margin-right: auto; margin-left: 30px; margin-top: 5px; margin-bottom: 40px; vertical-align: middle;\" type=\"submit\" value=\"show\"> " << endl
          << "</div>" << endl
          << "</form>" << endl

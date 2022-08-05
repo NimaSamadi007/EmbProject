@@ -31,6 +31,4 @@ void DBHandler::readFromDB(char* query, MYSQL_RES** res){
         finishWithError();
     }
     *res = mysql_store_result(con);
-    if (res == NULL)
-        std::cout << "Yayay!\n";
 }
